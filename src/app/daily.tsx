@@ -1,40 +1,42 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Alert,
-  ActivityIndicator,
-  Linking,
-  RefreshControl,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import {
   Camera,
+  Check,
   CheckCircle,
   Clock,
+  Eye,
+  Flame,
+  Moon,
+  Pill,
   Sparkles,
-  Wind,
   Sun,
   Sunrise,
   Sunset,
-  Moon,
-  ExternalLink,
-  Pill,
-  Flame,
-  Check,
+  Wind,
+  X
 } from 'lucide-react-native';
-import { supabase } from '../utils/supabase';
-import { localStore } from '../utils/localStore';
-import { uploadImageToSupabase } from '../utils/storage';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Linking,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AzkarPlayer from '../components/AzkarPlayer';
 import BreathingModal from '../components/BreathingModal';
 import PushupModal from '../components/PushupModal';
-import AzkarPlayer from '../components/AzkarPlayer';
 import { DAILY_AZKAR } from '../constants/azkar';
+import { localStore } from '../utils/localStore';
+import { uploadImageToSupabase } from '../utils/storage';
+import { supabase } from '../utils/supabase';
 
 interface PrayerItem {
   name: string;
@@ -63,6 +65,7 @@ export default function DailyScreen() {
   const [medicineDone, setMedicineDone] = useState(false);
   const [pushupsDone, setPushupsDone] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [viewingPhoto, setViewingPhoto] = useState<{ url: string; name: string; time?: string } | null>(null);
 
   const getTodayISO = () => new Date().toISOString().split('T')[0];
 
@@ -187,7 +190,11 @@ export default function DailyScreen() {
     const target = prayers.find((p) => p.name === prayerName);
     if (target?.isDone) {
       if (target.photoUrl) {
-        openPhotoInBrowser(target.photoUrl);
+        setViewingPhoto({
+          url: target.photoUrl,
+          name: target.name,
+          time: target.completedAt ? formatTime(target.completedAt) : undefined,
+        });
       } else {
         Alert.alert(
           `${prayerName} Completed`,
@@ -456,24 +463,19 @@ export default function DailyScreen() {
                     <View style={styles.doneContainer}>
                       {prayer.photoUrl ? (
                         <>
-                          <TouchableOpacity
-                            onPress={() => openPhotoInBrowser(prayer.photoUrl)}
-                            activeOpacity={0.7}
-                            style={styles.thumbnailWrapper}
-                          >
-                            <Image
-                              source={{ uri: prayer.photoUrl }}
-                              style={styles.proofThumbnail}
-                            />
-                          </TouchableOpacity>
-
                           {/* Clickable View Photo Link */}
                           <TouchableOpacity
                             style={styles.viewPhotoLink}
-                            onPress={() => openPhotoInBrowser(prayer.photoUrl)}
+                            onPress={() =>
+                              setViewingPhoto({
+                                url: prayer.photoUrl!,
+                                name: prayer.name,
+                                time: prayer.completedAt ? formatTime(prayer.completedAt) : undefined,
+                              })
+                            }
                             activeOpacity={0.7}
                           >
-                            <ExternalLink size={13} color="#2D6A4F" />
+                            <Eye size={13} color="#2D6A4F" />
                             <Text style={styles.viewPhotoText}>View</Text>
                           </TouchableOpacity>
                         </>
@@ -529,6 +531,60 @@ export default function DailyScreen() {
         onClose={() => setIsPushupModalOpen(false)}
         onCompleted={loadData}
       />
+
+      {/* In-App Prayer Photo Proof Viewer Modal */}
+      <Modal
+        visible={!!viewingPhoto}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setViewingPhoto(null)}
+      >
+        <View style={styles.photoModalBackdrop}>
+          <TouchableOpacity
+            style={styles.photoModalDismissArea}
+            activeOpacity={1}
+            onPress={() => setViewingPhoto(null)}
+          />
+
+          <View style={styles.photoModalCard}>
+            {/* Modal Header */}
+            <View style={styles.photoModalHeader}>
+              <View>
+                <Text style={styles.photoModalTitle}>{viewingPhoto?.name} Prayer Proof</Text>
+                {viewingPhoto?.time ? (
+                  <Text style={styles.photoModalSubtitle}>Completed at {viewingPhoto.time}</Text>
+                ) : null}
+              </View>
+              <TouchableOpacity
+                style={styles.photoModalCloseBtn}
+                onPress={() => setViewingPhoto(null)}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
+                <X size={20} color="#16231E" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Photo Container */}
+            <View style={styles.photoModalImageBox}>
+              {viewingPhoto?.url ? (
+                <Image
+                  source={{ uri: viewingPhoto.url }}
+                  style={styles.photoModalImage}
+                  resizeMode="contain"
+                />
+              ) : null}
+            </View>
+
+            {/* Bottom Verified Badge */}
+            <View style={styles.photoModalFooter}>
+              <View style={styles.photoModalBadge}>
+                <CheckCircle size={15} color="#2D6A4F" />
+                <Text style={styles.photoModalBadgeText}>Verified Photo Proof Saved</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -858,5 +914,87 @@ const styles = StyleSheet.create({
   },
   azkarList: {
     marginTop: 4,
+  },
+  photoModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(10, 20, 15, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  photoModalDismissArea: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  photoModalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  photoModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  photoModalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#16231E',
+  },
+  photoModalSubtitle: {
+    fontSize: 12,
+    color: '#758C81',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  photoModalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F1F4F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoModalImageBox: {
+    width: '100%',
+    height: 320,
+    backgroundColor: '#16231E',
+    borderRadius: 16,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoModalImage: {
+    width: '100%',
+    height: '100%',
+  },
+  photoModalFooter: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  photoModalBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#E4F0E9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  photoModalBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2D6A4F',
   },
 });
