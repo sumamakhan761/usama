@@ -63,8 +63,8 @@ export default function DashboardScreen() {
     };
     setTodayDate(new Date().toLocaleDateString(undefined, options));
 
-    // Daily affirmation
-    const quoteIndex = new Date().getDate() % DAILY_AFFIRMATIONS.length;
+    // Daily Hinglish mindful affirmation (Day 1 -> Quote 1, Day 2 -> Quote 2, loops after 30 days)
+    const quoteIndex = Math.max(0, (new Date().getDate() - 1)) % DAILY_AFFIRMATIONS.length;
     setDailyQuote(DAILY_AFFIRMATIONS[quoteIndex]);
 
     // 1. FAST LOCAL-FIRST LOAD (Never reset to 0)

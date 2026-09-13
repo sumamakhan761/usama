@@ -91,9 +91,35 @@ export const DAILY_AZKAR: AzkarItem[] = [
 ];
 
 export const DAILY_AFFIRMATIONS = [
-  "Take things one breath at a time. Allah is closer than your jugular vein.",
-  "You don't have to carry every thought. Notice it, breathe, and let it pass gently.",
-  "Small consistent steps are loved by Allah. Be kind to yourself today.",
-  "Peace comes from trusting the journey. You are safe in this moment.",
-  "Your heart deserves tranquility. Ease your mind and release tension."
+  "Har nayi subah ek nayi shuruaat hai. Apne dil aur dimaag ko shaant rakhein aur Allah par bharosa rakhein.",
+  "Dimaag ke har fuzool khayal ko pakadna zaroori nahi. Gehri saans lein aur usse aahista se guzarne dein.",
+  "Sabr sirf intezaar ka naam nahi, balki mushkil waqt mein achha ravayya rakhne ka naam hai.",
+  "Chhote chhote qadam hi badi manzil tak pahunchate hain. Aaj ke din apne aap par yaqeen rakhein.",
+  "Dil ka sukoon sirf Allah ke zikr aur shukr mein hai. Jo aaj mila hai, us par Alhamdu lillah kahein.",
+  "Gusse aur bechaini mein hamesha thode pal khamosh rahein. Sukoon hamesha ladaai se behtar hai.",
+  "Har mushkil ke baad aasaani zaroor aati hai. Himmat mat haarein, behtar waqt aane wala hai.",
+  "Apne dimaag ko negative soch se paak karein. Jo cheez control mein nahi, use Allah par chhod dein.",
+  "Aaj ka din ek nemat hai. Fuzool baaton par dhyan diye baghair apne maqsad par focus karein.",
+  "Kamyaabi ek raat mein nahi milti. Roz ki mehnat, sabr aur namaz hi asal raasta hai.",
+  "Jab bhi man bechain ho, 6-second gehri saans lein aur dil se kahein: 'Ye waqt bhi guzar jayega'.",
+  "Dusron se muqabla chhod kar sirf kal wale apne aap se behtar banne ki koshish karein.",
+  "Khamoshi aur sukoon mein dimaag ko taaqat milti hai. Thodi der khud ke sath baithein aur shanti mehsoos karein.",
+  "Allah kisi par uski bardasht se zyada bojh nahi daalta. Aap jitna sochte hain, usse kahin zyada mazboot hain.",
+  "Puraane gunahon ya galtiyon par pachtane ke bajaye, aaj ek naya aur behtar insaan banne ka faisla karein.",
+  "Urge ya buri aadat sirf ek lehar ki tarah hai. Thoda ruk kar saans lein, lehar khud-ba-khud utar jayegi.",
+  "Namaz dil ki safaai aur rooh ki taazgi hai. Apne Rabb ke samne sar jhukayein aur saari fikar bhula dein.",
+  "Koshish karna aapka farz hai, nateeja dena Allah ke haath mein hai. Mehnat karte rahein aur fikr chhod dein.",
+  "Apni zubaan aur soch ko hamesha seedha aur meetha rakhein. Achhi soch se hi achhi zindagi banti hai.",
+  "Apne aap par sakhti mat karein. Har din perfect nahi hota, lekin har din mein kuch na kuch behtar zaroor hota hai.",
+  "Jab dimaag thak jaye to ruk kar aaraam karein, par koshish karna kabhi mat chhodein.",
+  "Jo log shukr karte hain, Allah unki nematein aur badha deta hai. Har saans ke sath shukr ada karein.",
+  "Apni neeyat saaf rakhein. Jab neeyat achhi hoti hai, to raste khud-ba-khud aasaan ho jaate hain.",
+  "Kisi aur ki kamyabi se jalne ke bajaye, apni mehnat par dhyan dein. Har shaks ka waqt alag hota hai.",
+  "Mushkilaat insaan ko todne nahi, balki uski asal taaqat pehchanaane ke liye aati hain.",
+  "Dua mein aisi taaqat hai jo taqdeer ko bhi badal sakti hai. Hamesha sachhe dil se dua maangte rahein.",
+  "Overthinking se sirf kal ka sukoon chhinata hai, masla hal nahi hota. Present moment mein jeena seekhein.",
+  "Apne jism aur sehat ki hifazat karein, kyunki ye Allah ki di hui ek badi amanat hai.",
+  "Neki aur achhayi ka badla sirf achhayi hai. Sabke sath bhalai karein aur badle ki umeed sirf Allah se rakhein.",
+  "Aap akelay nahi hain. Allah hamesha aapke qareeb hai, sunta hai aur sambhalta hai. Sukoon se aage badhein."
 ];
+
