@@ -90,18 +90,26 @@ export const localStore = {
     } catch { }
   },
 
-  // Trackers map
-  async getTrackers(date: string): Promise<any[] | null> {
+  // Habit & Thought Trackers (Permanent, never resets on date change)
+  async getTrackers(date?: string): Promise<any[] | null> {
     try {
-      const raw = await AsyncStorage.getItem(`@trackers_${date}`);
-      return raw ? JSON.parse(raw) : null;
+      const raw = await AsyncStorage.getItem('@trackers_permanent');
+      if (raw) return JSON.parse(raw);
+      if (date) {
+        const oldRaw = await AsyncStorage.getItem(`@trackers_${date}`);
+        if (oldRaw) return JSON.parse(oldRaw);
+      }
+      return null;
     } catch {
       return null;
     }
   },
-  async setTrackers(date: string, data: any[]): Promise<void> {
+  async setTrackers(arg1: string | any[], arg2?: any[]): Promise<void> {
     try {
-      await AsyncStorage.setItem(`@trackers_${date}`, JSON.stringify(data));
+      const data = Array.isArray(arg1) ? arg1 : arg2;
+      if (data) {
+        await AsyncStorage.setItem('@trackers_permanent', JSON.stringify(data));
+      }
     } catch { }
   },
 

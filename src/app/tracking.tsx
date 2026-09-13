@@ -47,19 +47,18 @@ export default function TrackingScreen() {
   const loadTrackers = useCallback(async () => {
     const today = getTodayISO();
 
-    // 1. FAST LOCAL-FIRST LOAD (Never reset to 0)
-    const localCached = await localStore.getTrackers(today);
+    // 1. FAST LOCAL-FIRST LOAD (Permanent counters across all dates)
+    const localCached = await localStore.getTrackers();
     if (localCached && localCached.length > 0) {
       setTrackers(localCached);
       setIsLoading(false);
     }
 
-    // 2. SUPABASE SYNC
+    // 2. SUPABASE SYNC (Permanent cumulative list)
     try {
       const { data, error } = await supabase
         .from('trackers')
         .select('*')
-        .eq('date', today)
         .order('created_at', { ascending: true });
 
       if (!error && data && data.length > 0) {
@@ -70,10 +69,19 @@ export default function TrackingScreen() {
           return { ...remoteItem, count: highestCount };
         });
 
+        // Retain any locally added unsynced items
+        if (localCached) {
+          for (const localItem of localCached) {
+            if (!merged.some((m) => m.id === localItem.id || m.title === localItem.title)) {
+              merged.push(localItem);
+            }
+          }
+        }
+
         setTrackers(merged);
-        await localStore.setTrackers(today, merged);
+        await localStore.setTrackers(merged);
       } else if (!localCached || localCached.length === 0) {
-        // Seed default trackers for today if none exist anywhere
+        // Seed default trackers once if none exist anywhere
         const initial = DEFAULT_TRACKERS.map((title) => ({
           title,
           count: 0,
@@ -87,7 +95,7 @@ export default function TrackingScreen() {
 
         if (!insertErr && inserted) {
           setTrackers(inserted);
-          await localStore.setTrackers(today, inserted);
+          await localStore.setTrackers(inserted);
         }
       }
     } catch (e) {
@@ -126,7 +134,7 @@ export default function TrackingScreen() {
 
     const updatedTrackers = [...trackers, newTracker];
     setTrackers(updatedTrackers);
-    await localStore.setTrackers(today, updatedTrackers);
+    await localStore.setTrackers(updatedTrackers);
     setNewTitle('');
 
     try {
@@ -145,7 +153,7 @@ export default function TrackingScreen() {
       if (!error && data) {
         const finalized = updatedTrackers.map((t) => (t.id === tempId ? data : t));
         setTrackers(finalized);
-        await localStore.setTrackers(today, finalized);
+        await localStore.setTrackers(finalized);
       }
     } catch (e: any) {
       console.warn('Error syncing new tracker to DB:', e);
@@ -154,9 +162,8 @@ export default function TrackingScreen() {
     }
   };
 
-  // Increment counter (+1) - No haptics / beeps
+  // Increment counter (+1) - No haptics / beeps, permanent cumulative
   const handleIncrement = async (tracker: TrackerItem) => {
-    const today = getTodayISO();
     const newCount = tracker.count + 1;
 
     // Instant local state update
@@ -164,7 +171,7 @@ export default function TrackingScreen() {
       t.id === tracker.id ? { ...t, count: newCount } : t
     );
     setTrackers(updated);
-    await localStore.setTrackers(today, updated);
+    await localStore.setTrackers(updated);
 
     // Sync to Supabase if not a temporary ID
     if (!tracker.id.startsWith('temp-')) {
@@ -183,12 +190,12 @@ export default function TrackingScreen() {
   };
 
   const formatItemDate = (isoString?: string) => {
-    if (!isoString) return 'Today';
+    if (!isoString) return 'Active';
     try {
       const d = new Date(isoString);
       return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
     } catch {
-      return 'Today';
+      return 'Active';
     }
   };
 
@@ -201,7 +208,7 @@ export default function TrackingScreen() {
         </View>
         <Text style={styles.title}>Habit & Thought Counters</Text>
         <Text style={styles.subtitle}>
-          Track urges, thoughts, or custom habits. Tap + to increment count smoothly.
+          Track urges, thoughts, or custom habits. Counters are permanent and keep accumulating.
         </Text>
       </View>
 
@@ -259,13 +266,13 @@ export default function TrackingScreen() {
                   <Text style={styles.trackerCountSub}>
                     Observed <Text style={styles.boldCount}>{item.count}</Text> times
                   </Text>
-                  {/* Small Two Days / Today & Date Tag */}
+                  {/* Cumulative Permanent Tag */}
                   <View style={styles.metaRow}>
-                    <Text style={styles.smallMetaBadge}>Two days</Text>
+                    <Text style={styles.smallMetaBadge}>Cumulative</Text>
                     <Text style={styles.dotSeparator}>•</Text>
                     <Calendar size={11} color="#758C81" />
                     <Text style={styles.metaDate}>
-                      Today ({formatItemDate(item.created_at)})
+                      Started {formatItemDate(item.created_at)}
                     </Text>
                   </View>
                 </View>
