@@ -16,6 +16,7 @@ import {
   Activity,
   Sparkles,
   Calendar,
+  Trash2,
 } from 'lucide-react-native';
 import { supabase } from '../utils/supabase';
 import { localStore } from '../utils/localStore';
@@ -189,6 +190,37 @@ export default function TrackingScreen() {
     }
   };
 
+  const confirmDeleteTracker = (tracker: TrackerItem) => {
+    Alert.alert(
+      'Delete Tracker',
+      `Are you sure you want to remove "${tracker.title}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => handleDeleteTracker(tracker),
+        },
+      ]
+    );
+  };
+
+  const handleDeleteTracker = async (tracker: TrackerItem) => {
+    // 1. Instant local removal
+    const updated = trackers.filter((t) => t.id !== tracker.id);
+    setTrackers(updated);
+    await localStore.setTrackers(updated);
+
+    // 2. Supabase deletion
+    if (!tracker.id.startsWith('temp-')) {
+      try {
+        await supabase.from('trackers').delete().eq('id', tracker.id);
+      } catch (e) {
+        console.warn('Error deleting tracker from DB:', e);
+      }
+    }
+  };
+
   const formatItemDate = (isoString?: string) => {
     if (!isoString) return 'Active';
     try {
@@ -278,14 +310,25 @@ export default function TrackingScreen() {
                 </View>
               </View>
 
-              {/* Increment Button (Pure Plus Action) */}
-              <TouchableOpacity
-                style={styles.incrementBtn}
-                onPress={() => handleIncrement(item)}
-                activeOpacity={0.75}
-              >
-                <Plus size={22} color="#FFFFFF" strokeWidth={2.8} />
-              </TouchableOpacity>
+              {/* Action Buttons: Delete + Increment */}
+              <View style={styles.trackerActions}>
+                <TouchableOpacity
+                  style={styles.deleteTrackerBtn}
+                  onPress={() => confirmDeleteTracker(item)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Trash2 size={16} color="#E07A5F" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.incrementBtn}
+                  onPress={() => handleIncrement(item)}
+                  activeOpacity={0.75}
+                >
+                  <Plus size={22} color="#FFFFFF" strokeWidth={2.8} />
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         />
@@ -446,6 +489,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#758C81',
     fontWeight: '500',
+  },
+  trackerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  deleteTrackerBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FDF2F0',
+    borderWidth: 1,
+    borderColor: '#FBD5D0',
   },
   incrementBtn: {
     alignItems: 'center',

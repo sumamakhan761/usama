@@ -28,6 +28,7 @@ import {
   FileText,
   Clock,
   Sparkles,
+  Trash2,
 } from 'lucide-react-native';
 import { supabase } from '../utils/supabase';
 import { localStore } from '../utils/localStore';
@@ -290,6 +291,47 @@ export default function NotesScreen() {
     }
   };
 
+  const confirmDeleteNote = (note: NoteItem) => {
+    Alert.alert(
+      'Delete Note',
+      `Are you sure you want to delete this ${note.note_type === 'voice' ? 'voice memo' : 'note'}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => handleDeleteNote(note),
+        },
+      ]
+    );
+  };
+
+  const handleDeleteNote = async (note: NoteItem) => {
+    // Stop playback if playing this note
+    if (playingNoteId === note.id && playerRef.current) {
+      try {
+        playerRef.current.pause();
+        playerRef.current.release();
+        playerRef.current = null;
+      } catch (e) {}
+      setPlayingNoteId(null);
+    }
+
+    // 1. Instant local removal
+    const updated = notes.filter((n) => n.id !== note.id);
+    setNotes(updated);
+    await localStore.setNotes(updated);
+
+    // 2. Supabase deletion
+    if (!note.id.startsWith('temp-')) {
+      try {
+        await supabase.from('notes').delete().eq('id', note.id);
+      } catch (e) {
+        console.warn('Error deleting note from DB:', e);
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Top Header */}
@@ -301,7 +343,7 @@ export default function NotesScreen() {
           </View>
           <Text style={styles.title}>Notes & Voice</Text>
           <Text style={styles.subtitle}>
-            Pour your thoughts out. Nothing is deleted — your journey is permanently preserved.
+            Pour your thoughts out. Your mindful thoughts and voice reflections in one safe space.
           </Text>
         </View>
       </View>
@@ -413,9 +455,20 @@ export default function NotesScreen() {
                     </Text>
                   </View>
 
-                  <View style={styles.dateBadge}>
-                    <Clock size={12} color="#758C81" />
-                    <Text style={styles.dateText}>{formatDate(item.created_at)}</Text>
+                  <View style={styles.headerRightActions}>
+                    <View style={styles.dateBadge}>
+                      <Clock size={12} color="#758C81" />
+                      <Text style={styles.dateText}>{formatDate(item.created_at)}</Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={styles.deleteNoteBtn}
+                      onPress={() => confirmDeleteNote(item)}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Trash2 size={14} color="#E07A5F" />
+                    </TouchableOpacity>
                   </View>
                 </View>
 
@@ -614,6 +667,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#2D6A4F',
     letterSpacing: 0.5,
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  deleteNoteBtn: {
+    padding: 5,
+    borderRadius: 7,
+    backgroundColor: '#FDF2F0',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dateBadge: {
     flexDirection: 'row',
