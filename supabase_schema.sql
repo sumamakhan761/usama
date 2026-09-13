@@ -1,5 +1,5 @@
 -- =========================================================
--- Osama - Mental Wellness, Habit & Spiritual Tracking Schema
+-- Usama - Mental Wellness, Habit & Spiritual Tracking Schema
 -- Run this in your Supabase SQL Editor (Dashboard > SQL Editor)
 -- =========================================================
 

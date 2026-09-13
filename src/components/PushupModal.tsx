@@ -178,7 +178,7 @@ export default function PushupModal({ visible, onClose, onCompleted }: PushupMod
             </View>
             <Text style={styles.finishedTitle}>Congratulations! You Did It!</Text>
             <Text style={styles.finishedSubtitle}>
-              You crushed the 60-second push-up challenge today! Your physical strength fuels your mental resilience.
+              You crushed the 60-second push-up challenge today! Your physical strength fuels your discipline and inner strength.
             </Text>
             <TouchableOpacity style={styles.completeBtn} onPress={onClose}>
               <Text style={styles.completeBtnText}>Save & Return</Text>

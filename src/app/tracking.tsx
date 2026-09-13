@@ -197,11 +197,11 @@ export default function TrackingScreen() {
       <View style={styles.header}>
         <View style={styles.badgeRow}>
           <Sparkles size={14} color="#2D6A4F" />
-          <Text style={styles.badgeText}>OSAMA • MINDFUL TRACKING</Text>
+          <Text style={styles.badgeText}>USAMA • HABIT TRACKING</Text>
         </View>
         <Text style={styles.title}>Habit & Thought Counters</Text>
         <Text style={styles.subtitle}>
-          Track urges, thoughts, or custom habits. Tap +1 to increment count smoothly.
+          Track urges, thoughts, or custom habits. Tap + to increment count smoothly.
         </Text>
       </View>
 
@@ -271,14 +271,13 @@ export default function TrackingScreen() {
                 </View>
               </View>
 
-              {/* +1 Increment Button */}
+              {/* Increment Button (Pure Plus Action) */}
               <TouchableOpacity
                 style={styles.incrementBtn}
                 onPress={() => handleIncrement(item)}
                 activeOpacity={0.75}
               >
-                <Plus size={18} color="#FFFFFF" strokeWidth={3} />
-                <Text style={styles.incrementBtnText}>+1</Text>
+                <Plus size={22} color="#FFFFFF" strokeWidth={2.8} />
               </TouchableOpacity>
             </View>
           )}
@@ -442,25 +441,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   incrementBtn: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
     backgroundColor: '#2D6A4F',
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 16,
-    minWidth: 76,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     shadowColor: '#2D6A4F',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 6,
-    elevation: 2,
-  },
-  incrementBtnText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
+    elevation: 3,
   },
   loaderContainer: {
     flex: 1,

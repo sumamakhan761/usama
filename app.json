@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Osama",
+    "name": "Usama",
     "slug": "usama",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "osama",
+    "scheme": "usama",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
@@ -16,7 +16,7 @@
       }
     },
     "android": {
-      "package": "com.wellness.osama",
+      "package": "com.wellness.usama",
       "adaptiveIcon": {
         "backgroundColor": "#2D6A4F",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

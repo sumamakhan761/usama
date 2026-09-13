@@ -306,7 +306,7 @@ export default function DailyScreen() {
         <View style={styles.header}>
           <View style={styles.badgeRow}>
             <Sparkles size={14} color="#2D6A4F" />
-            <Text style={styles.badgeText}>OSAMA • DAILY HABITS</Text>
+            <Text style={styles.badgeText}>USAMA • DAILY HABITS</Text>
           </View>
           <Text style={styles.title}>Spiritual & Physical Wellness</Text>
           <Text style={styles.subtitle}>

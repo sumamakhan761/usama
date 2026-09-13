@@ -2,6 +2,20 @@ import { supabase } from './supabase';
 import { Platform } from 'react-native';
 
 /**
+ * Helper to convert a Blob to an ArrayBuffer safely across React Native Hermes & Web
+ */
+function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result as ArrayBuffer);
+    };
+    reader.onerror = (e) => reject(e);
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+/**
  * Upload an image (file URI or base64) to Supabase Storage bucket
  */
 export async function uploadImageToSupabase(
@@ -12,11 +26,11 @@ export async function uploadImageToSupabase(
     const filename = `${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
     const filePath = `photos/${filename}`;
 
-    // On web vs native
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
     if (Platform.OS === 'web') {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from(bucketName)
         .upload(filePath, blob, {
           contentType: 'image/jpeg',
@@ -29,12 +43,9 @@ export async function uploadImageToSupabase(
         .getPublicUrl(filePath);
       return publicUrlData.publicUrl;
     } else {
-      // React Native file upload via FormData or Blob
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const arrayBuffer = await new Response(blob).arrayBuffer();
+      const arrayBuffer = await blobToArrayBuffer(blob);
 
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from(bucketName)
         .upload(filePath, arrayBuffer, {
           contentType: 'image/jpeg',
@@ -48,8 +59,8 @@ export async function uploadImageToSupabase(
       return publicUrlData.publicUrl;
     }
   } catch (err: any) {
-    console.warn('Supabase storage upload fallback to local URI:', err.message);
-    // Return the local URI so the user's progress is never interrupted!
+    console.warn('Supabase storage upload fallback to local URI:', err?.message || err);
+    // Return local URI so user experience is uninterrupted
     return uri;
   }
 }
@@ -67,22 +78,38 @@ export async function uploadAudioToSupabase(
 
     const response = await fetch(uri);
     const blob = await response.blob();
-    const arrayBuffer = await new Response(blob).arrayBuffer();
 
-    const { data, error } = await supabase.storage
-      .from(bucketName)
-      .upload(filePath, arrayBuffer, {
-        contentType: 'audio/m4a',
-        upsert: true,
-      });
+    if (Platform.OS === 'web') {
+      const { error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, blob, {
+          contentType: 'audio/m4a',
+          upsert: true,
+        });
 
-    if (error) throw error;
-    const { data: publicUrlData } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(filePath);
-    return publicUrlData.publicUrl;
+      if (error) throw error;
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+      return publicUrlData.publicUrl;
+    } else {
+      const arrayBuffer = await blobToArrayBuffer(blob);
+
+      const { error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, arrayBuffer, {
+          contentType: 'audio/m4a',
+          upsert: true,
+        });
+
+      if (error) throw error;
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+      return publicUrlData.publicUrl;
+    }
   } catch (err: any) {
-    console.warn('Supabase audio storage upload fallback to local URI:', err.message);
+    console.warn('Supabase audio storage upload fallback to local URI:', err?.message || err);
     return uri;
   }
 }

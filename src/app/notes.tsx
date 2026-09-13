@@ -51,6 +51,7 @@ export default function NotesScreen() {
   // Audio Recording with expo-audio
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [isRecording, setIsRecording] = useState(false);
+  const [isSavingVoice, setIsSavingVoice] = useState(false);
   const [recordDuration, setRecordDuration] = useState(0);
   const recordingTimer = useRef<any>(null);
 
@@ -158,6 +159,7 @@ export default function NotesScreen() {
         return;
       }
 
+      await audioRecorder.prepareToRecordAsync();
       audioRecorder.record();
       setIsRecording(true);
       setRecordDuration(0);
@@ -165,48 +167,77 @@ export default function NotesScreen() {
       recordingTimer.current = setInterval(() => {
         setRecordDuration((prev) => prev + 1);
       }, 1000);
-    } catch (err) {
+    } catch (err: any) {
       console.warn('Failed to start recording:', err);
-      Alert.alert('Error', 'Could not access microphone.');
+      Alert.alert('Recording Error', 'Could not access microphone: ' + (err?.message || 'Please check permissions.'));
     }
   };
 
-  // 3. Stop Voice Recording & Upload (No haptics)
+  // 3. Stop Voice Recording & Upload with Optimistic UI
   const stopRecordingAndSave = async () => {
-    clearInterval(recordingTimer.current);
-    setIsRecording(false);
+    if (isSavingVoice) return;
+    setIsSavingVoice(true);
+
+    if (recordingTimer.current) {
+      clearInterval(recordingTimer.current);
+    }
+
+    const duration = recordDuration;
+    const durationFormatted = `${Math.floor(duration / 60)}:${(duration % 60)
+      .toString()
+      .padStart(2, '0')}`;
+    const memoTitle = `Voice Memo (${durationFormatted})`;
 
     try {
       await audioRecorder.stop();
-      const uri = audioRecorder.uri;
+      const status = audioRecorder.getStatus();
+      const uri = audioRecorder.uri || status?.url;
 
-      if (!uri) return;
+      // 1. Optimistic UI insert: Immediately show voice memo in list & local cache!
+      const tempId = 'voice-' + Date.now();
+      const tempItem: NoteItem = {
+        id: tempId,
+        note_type: 'voice',
+        content: memoTitle,
+        audio_url: uri || undefined,
+        created_at: new Date().toISOString(),
+      };
 
-      // Upload audio to Supabase Storage bucket 'voice-notes'
-      const publicUrl = await uploadAudioToSupabase(uri, 'voice-notes');
+      const updated = [tempItem, ...notes];
+      setNotes(updated);
+      await localStore.setNotes(updated);
 
-      // Save to Supabase notes table
-      const { data, error } = await supabase
-        .from('notes')
-        .insert([
-          {
-            note_type: 'voice',
-            audio_url: publicUrl,
-            content: `Voice Memo (${Math.floor(recordDuration / 60)}:${(recordDuration % 60)
-              .toString()
-              .padStart(2, '0')})`,
-          },
-        ])
-        .select()
-        .single();
+      setIsRecording(false);
+      setRecordDuration(0);
 
-      if (!error && data) {
-        const updated = [data, ...notes];
-        setNotes(updated);
-        await localStore.setNotes(updated);
+      // 2. Background cloud synchronization
+      if (uri) {
+        const publicUrl = await uploadAudioToSupabase(uri, 'voice-notes');
+
+        const { data, error } = await supabase
+          .from('notes')
+          .insert([
+            {
+              note_type: 'voice',
+              audio_url: publicUrl || uri,
+              content: memoTitle,
+            },
+          ])
+          .select()
+          .single();
+
+        if (!error && data) {
+          const finalized = updated.map((n) => (n.id === tempId ? data : n));
+          setNotes(finalized);
+          await localStore.setNotes(finalized);
+        }
       }
     } catch (err) {
       console.warn('Failed to save voice recording:', err);
+      setIsRecording(false);
+      setRecordDuration(0);
+    } finally {
+      setIsSavingVoice(false);
     }
   };
 
@@ -266,9 +297,9 @@ export default function NotesScreen() {
         <View>
           <View style={styles.badgeRow}>
             <Sparkles size={14} color="#2D6A4F" />
-            <Text style={styles.badgeText}>OSAMA • SAFE UNBURDENING</Text>
+            <Text style={styles.badgeText}>USAMA • SAFE UNBURDENING</Text>
           </View>
-          <Text style={styles.title}>Mental Notes & Voice</Text>
+          <Text style={styles.title}>Notes & Voice</Text>
           <Text style={styles.subtitle}>
             Pour your thoughts out. Nothing is deleted — your journey is permanently preserved.
           </Text>
@@ -328,10 +359,17 @@ export default function NotesScreen() {
             <TouchableOpacity
               style={styles.stopRecordingBtn}
               onPress={stopRecordingAndSave}
+              disabled={isSavingVoice}
               activeOpacity={0.8}
             >
-              <Square size={16} color="#FFFFFF" fill="#FFFFFF" />
-              <Text style={styles.stopRecordingText}>Save Memo</Text>
+              {isSavingVoice ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Square size={16} color="#FFFFFF" fill="#FFFFFF" />
+                  <Text style={styles.stopRecordingText}>Save Memo</Text>
+                </>
+              )}
             </TouchableOpacity>
           </View>
         )}

@@ -20,6 +20,7 @@ import {
   Flame,
   Smile,
   Check,
+  Compass,
 } from 'lucide-react-native';
 import { supabase } from '../utils/supabase';
 import { localStore } from '../utils/localStore';
@@ -257,7 +258,7 @@ export default function DashboardScreen() {
           <View>
             <View style={styles.badgeRow}>
               <Sparkles size={14} color="#2D6A4F" />
-              <Text style={styles.badgeText}>OSAMA</Text>
+              <Text style={styles.badgeText}>USAMA</Text>
             </View>
             <Text style={styles.greetingTitle}>Assalamu Alaikum</Text>
             <View style={styles.dateRow}>
@@ -284,71 +285,89 @@ export default function DashboardScreen() {
 
         <View style={styles.goalsGrid}>
           {/* 1. Salah */}
-          <View style={[styles.goalPill, prayersDone === 5 && styles.goalPillDone]}>
-            <Text style={styles.goalPillEmoji}>🕌</Text>
-            <View style={styles.goalPillContent}>
-              <Text style={styles.goalPillTitle}>5 Salah</Text>
-              <Text style={styles.goalPillStatus}>
-                {prayersDone === 5 ? '5/5 Done ✅' : `${prayersDone}/5 Done`}
-              </Text>
+          <View style={[styles.goalWidget, prayersDone === 5 && styles.goalWidgetDone]}>
+            <View style={[styles.goalIconCircle, { backgroundColor: '#E4F0E9', borderColor: '#C5DFD0' }]}>
+              <Compass size={18} color="#2D6A4F" strokeWidth={2.4} />
+            </View>
+            <View style={styles.goalWidgetBody}>
+              <Text style={styles.goalWidgetTitle}>5 Salah</Text>
+              <View style={[styles.goalStatusBadge, prayersDone === 5 && styles.goalStatusBadgeDone]}>
+                <Text style={[styles.goalStatusText, prayersDone === 5 && styles.goalStatusTextDone]}>
+                  {prayersDone === 5 ? '5/5 Done' : `${prayersDone}/5 Done`}
+                </Text>
+              </View>
             </View>
           </View>
 
           {/* 2. Inhale / Exhale Breathing */}
           <TouchableOpacity
-            style={[styles.goalPill, breathingDone && styles.goalPillDone]}
+            style={[styles.goalWidget, breathingDone && styles.goalWidgetDone]}
             onPress={() => setIsBreathingModalOpen(true)}
             activeOpacity={0.8}
           >
-            <Text style={styles.goalPillEmoji}>🌬️</Text>
-            <View style={styles.goalPillContent}>
-              <Text style={styles.goalPillTitle}>Breathing</Text>
-              <Text style={styles.goalPillStatus}>
-                {breathingDone ? 'Complete ✅' : 'Tap to Start'}
-              </Text>
+            <View style={[styles.goalIconCircle, { backgroundColor: '#E0F2FE', borderColor: '#BAE6FD' }]}>
+              <Wind size={18} color="#0284C7" strokeWidth={2.4} />
+            </View>
+            <View style={styles.goalWidgetBody}>
+              <Text style={styles.goalWidgetTitle}>Breathing</Text>
+              <View style={[styles.goalStatusBadge, breathingDone && styles.goalStatusBadgeDone]}>
+                <Text style={[styles.goalStatusText, breathingDone && styles.goalStatusTextDone]}>
+                  {breathingDone ? 'Complete' : '1 min Box'}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
 
           {/* 3. Push-ups */}
           <TouchableOpacity
-            style={[styles.goalPill, pushupsDone && styles.goalPillDone]}
+            style={[styles.goalWidget, pushupsDone && styles.goalWidgetDone]}
             onPress={() => setIsPushupModalOpen(true)}
             activeOpacity={0.8}
           >
-            <Text style={styles.goalPillEmoji}>💪</Text>
-            <View style={styles.goalPillContent}>
-              <Text style={styles.goalPillTitle}>Push-ups</Text>
-              <Text style={styles.goalPillStatus}>
-                {pushupsDone ? 'Complete ✅' : '60s Challenge'}
-              </Text>
+            <View style={[styles.goalIconCircle, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}>
+              <Flame size={18} color="#D97706" strokeWidth={2.4} />
+            </View>
+            <View style={styles.goalWidgetBody}>
+              <Text style={styles.goalWidgetTitle}>Push-ups</Text>
+              <View style={[styles.goalStatusBadge, pushupsDone && styles.goalStatusBadgeDone]}>
+                <Text style={[styles.goalStatusText, pushupsDone && styles.goalStatusTextDone]}>
+                  {pushupsDone ? 'Complete' : '60s Goal'}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
 
           {/* 4. Medicine */}
           <TouchableOpacity
-            style={[styles.goalPill, medicineDone && styles.goalPillDone]}
+            style={[styles.goalWidget, medicineDone && styles.goalWidgetDone]}
             onPress={handleToggleMedicine}
             activeOpacity={0.8}
           >
-            <Text style={styles.goalPillEmoji}>💊</Text>
-            <View style={styles.goalPillContent}>
-              <Text style={styles.goalPillTitle}>Medicine</Text>
-              <Text style={styles.goalPillStatus}>
-                {medicineDone ? 'Taken ✅' : 'Mark Done'}
-              </Text>
+            <View style={[styles.goalIconCircle, { backgroundColor: '#EDE9FE', borderColor: '#DDD6FE' }]}>
+              <Pill size={18} color="#7C3AED" strokeWidth={2.4} />
+            </View>
+            <View style={styles.goalWidgetBody}>
+              <Text style={styles.goalWidgetTitle}>Medicine</Text>
+              <View style={[styles.goalStatusBadge, medicineDone && styles.goalStatusBadgeDone]}>
+                <Text style={[styles.goalStatusText, medicineDone && styles.goalStatusTextDone]}>
+                  {medicineDone ? 'Taken' : 'Mark Done'}
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
 
           {/* 5. Mood Check */}
-          <View style={[styles.goalPill, todayMood && styles.goalPillDone]}>
-            <Text style={styles.goalPillEmoji}>
-              {todayMood ? MOOD_OPTIONS.find((m) => m.label === todayMood)?.emoji || '😊' : '✨'}
-            </Text>
-            <View style={styles.goalPillContent}>
-              <Text style={styles.goalPillTitle}>Mood</Text>
-              <Text style={styles.goalPillStatus}>
-                {todayMood ? `${todayMood} ✅` : 'Check-in Below'}
-              </Text>
+          <View style={[styles.goalWidget, todayMood && styles.goalWidgetDone]}>
+            <View style={[styles.goalIconCircle, { backgroundColor: '#FFE4E6', borderColor: '#FECDD3' }]}>
+              <Smile size={18} color="#EA580C" strokeWidth={2.4} />
+            </View>
+            <View style={styles.goalWidgetBody}>
+              <Text style={styles.goalWidgetTitle}>Mood</Text>
+              <View style={[styles.goalStatusBadge, todayMood && styles.goalStatusBadgeDone]}>
+                <Text style={[styles.goalStatusText, todayMood && styles.goalStatusTextDone]}>
+                  {todayMood ? todayMood : 'Check-in'}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -462,14 +481,14 @@ export default function DashboardScreen() {
             <Text style={styles.gutkaCountLabel}>intakes logged today</Text>
           </View>
 
-          {/* Large Friendly +1 Tap Button */}
+          {/* Friendly Add Intake Tap Button */}
           <TouchableOpacity
             style={styles.gutkaAddButton}
             onPress={handleIncrementGutka}
             activeOpacity={0.8}
           >
-            <Plus size={26} color="#FFFFFF" strokeWidth={2.5} />
-            <Text style={styles.gutkaAddButtonText}>Add Intake (+1)</Text>
+            <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
+            <Text style={styles.gutkaAddButtonText}>Add Intake</Text>
           </TouchableOpacity>
 
           {/* Past 7 Days Mini Trend */}
@@ -622,40 +641,67 @@ const styles = StyleSheet.create({
   goalsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
     marginBottom: 18,
   },
-  goalPill: {
-    flexBasis: '31%',
+  goalWidget: {
+    flexBasis: '30%',
     flexGrow: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 10,
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     borderWidth: 1,
-    borderColor: '#E3E8DF',
+    borderColor: '#E7ECE5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: '#16231E',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  goalWidgetDone: {
+    backgroundColor: '#F3F9F5',
+    borderColor: '#BFE0CE',
+  },
+  goalIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  goalWidgetBody: {
     alignItems: 'center',
     gap: 4,
   },
-  goalPillDone: {
-    backgroundColor: '#E4F0E9',
-    borderColor: '#C7E1D2',
-  },
-  goalPillEmoji: {
-    fontSize: 18,
-  },
-  goalPillContent: {
-    alignItems: 'center',
-  },
-  goalPillTitle: {
-    fontSize: 11,
+  goalWidgetTitle: {
+    fontSize: 12,
     fontWeight: '700',
     color: '#16231E',
+    textAlign: 'center',
   },
-  goalPillStatus: {
+  goalStatusBadge: {
+    backgroundColor: '#F1F4F0',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  goalStatusBadgeDone: {
+    backgroundColor: '#E4F0E9',
+  },
+  goalStatusText: {
     fontSize: 10,
-    color: '#2D6A4F',
+    color: '#64748B',
     fontWeight: '600',
-    marginTop: 2,
+    textAlign: 'center',
+  },
+  goalStatusTextDone: {
+    color: '#2D6A4F',
+    fontWeight: '700',
   },
   quickActionsRow: {
     flexDirection: 'row',
