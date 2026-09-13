@@ -1,9 +1,9 @@
 import { AudioPlayer, createAudioPlayer } from 'expo-audio';
-import { ExternalLink, Pause, Play, Sparkles, Volume2 } from 'lucide-react-native';
+import { Pause, Play, Sparkles, Volume2 } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Linking,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -56,14 +56,7 @@ export default function AzkarPlayer({ item }: AzkarPlayerProps) {
     }
   };
 
-  const openSourceLink = async () => {
-    if (!item.sourceUrl) return;
-    try {
-      await Linking.openURL(item.sourceUrl);
-    } catch (err) {
-      console.warn('Could not open source link:', err);
-    }
-  };
+  const isRahman = item.category === 'rahman';
 
   return (
     <View style={styles.card}>
@@ -85,18 +78,34 @@ export default function AzkarPlayer({ item }: AzkarPlayerProps) {
         <Text style={styles.surahNumberText}>{item.surahNumber}</Text>
       )}
 
-      {/* Arabic Script */}
-      <View style={styles.arabicBox}>
-        <Text style={styles.arabicText}>{item.arabic}</Text>
-      </View>
+      {/* Surah Content (Scrollable for Surah Ar-Rahman; direct view for others) */}
+      {isRahman ? (
+        <View style={styles.rahmanWrapper}>
+          <Text style={styles.scrollHintText}>📜 Scroll to read full Surah Ar-Rahman (78 Verses)</Text>
+          <ScrollView
+            style={styles.rahmanScrollBox}
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={true}
+          >
+            <View style={styles.arabicBox}>
+              <Text style={styles.arabicText}>{item.arabic}</Text>
+            </View>
+            <Text style={styles.translation}>"{item.translation}"</Text>
+          </ScrollView>
+        </View>
+      ) : (
+        <>
+          {/* Arabic Script */}
+          <View style={styles.arabicBox}>
+            <Text style={styles.arabicText}>{item.arabic}</Text>
+          </View>
 
-      {/* Transliteration */}
-      <Text style={styles.transliteration}>{item.transliteration}</Text>
+          {/* Translation */}
+          <Text style={styles.translation}>"{item.translation}"</Text>
+        </>
+      )}
 
-      {/* Translation */}
-      <Text style={styles.translation}>"{item.translation}"</Text>
-
-      {/* Action Buttons: Listen to Dhikr & Source Link */}
+      {/* Audio Playback Button */}
       <View style={styles.actionsRow}>
         <TouchableOpacity
           style={[styles.playButton, isPlaying && styles.playingButton]}
@@ -118,17 +127,6 @@ export default function AzkarPlayer({ item }: AzkarPlayerProps) {
             </>
           )}
         </TouchableOpacity>
-
-        {item.sourceUrl && (
-          <TouchableOpacity
-            style={styles.sourceBtn}
-            onPress={openSourceLink}
-            activeOpacity={0.7}
-          >
-            <ExternalLink size={14} color="#2D6A4F" />
-            <Text style={styles.sourceBtnText}>Source (Quran.com)</Text>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
@@ -191,6 +189,24 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 12,
   },
+  rahmanWrapper: {
+    marginBottom: 16,
+  },
+  scrollHintText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#2D6A4F',
+    marginBottom: 6,
+    letterSpacing: 0.2,
+  },
+  rahmanScrollBox: {
+    maxHeight: 280,
+    backgroundColor: '#F8F9F5',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E3E8DF',
+    padding: 12,
+  },
   arabicBox: {
     backgroundColor: '#F8F9F5',
     padding: 16,
@@ -203,13 +219,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     lineHeight: 34,
     fontWeight: '600',
-  },
-  transliteration: {
-    fontSize: 13,
-    fontStyle: 'italic',
-    color: '#4D6257',
-    marginBottom: 8,
-    lineHeight: 18,
   },
   translation: {
     fontSize: 14,
@@ -236,21 +245,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
-  },
-  sourceBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#F2F7F4',
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#C7E1D2',
-  },
-  sourceBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2D6A4F',
   },
 });
