@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View,
+  Activity,
+  Calendar,
+  Plus,
+  Sparkles,
+  Trash2,
+} from 'lucide-react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-  RefreshControl,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  Plus,
-  Activity,
-  Sparkles,
-  Calendar,
-  Trash2,
-} from 'lucide-react-native';
-import { supabase } from '../utils/supabase';
 import { localStore } from '../utils/localStore';
+import { supabase } from '../utils/supabase';
 
 interface TrackerItem {
   id: string;
@@ -28,13 +28,6 @@ interface TrackerItem {
   date: string;
   created_at: string;
 }
-
-const DEFAULT_TRACKERS = [
-  'Overthinking Loop',
-  'Anxious / Racing Thought',
-  'Negative Self-Talk',
-  'Restless Urge',
-];
 
 export default function TrackingScreen() {
   const [trackers, setTrackers] = useState<TrackerItem[]>([]);
@@ -81,23 +74,10 @@ export default function TrackingScreen() {
 
         setTrackers(merged);
         await localStore.setTrackers(merged);
-      } else if (!localCached || localCached.length === 0) {
-        // Seed default trackers once if none exist anywhere
-        const initial = DEFAULT_TRACKERS.map((title) => ({
-          title,
-          count: 0,
-          date: today,
-        }));
-
-        const { data: inserted, error: insertErr } = await supabase
-          .from('trackers')
-          .insert(initial)
-          .select();
-
-        if (!insertErr && inserted) {
-          setTrackers(inserted);
-          await localStore.setTrackers(inserted);
-        }
+      } else if (!error && (!data || data.length === 0)) {
+        // Clean database state - Never auto-insert dummy trackers
+        setTrackers([]);
+        await localStore.setTrackers([]);
       }
     } catch (e) {
       console.warn('Trackers sync error:', e);
@@ -331,6 +311,15 @@ export default function TrackingScreen() {
               </View>
             </View>
           )}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Activity size={42} color="#C5DFD0" />
+              <Text style={styles.emptyTitle}>No trackers added yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Add your custom habit, thought pattern, or urge using the input card above to start tracking.
+              </Text>
+            </View>
+          }
         />
       )}
     </SafeAreaView>
@@ -522,5 +511,24 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#16231E',
+    marginTop: 14,
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: '#758C81',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
