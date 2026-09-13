@@ -1,26 +1,40 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import '@/global.css';
-
 import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#16231E',
+    textSecondary: '#4D6257',
+    textMuted: '#788F84',
+    background: '#F7F8F4',
+    cardBackground: '#FFFFFF',
+    backgroundElement: '#EFF2EC',
+    backgroundSelected: '#DEE4D8',
+    primary: '#2D6A4F',
+    primaryHover: '#22553F',
+    primaryLight: '#E3EFE8',
+    accent: '#40916C',
+    amberLight: '#FEF3C7',
+    amberText: '#B45309',
+    border: '#E3E8DF',
+    cardShadow: 'rgba(20, 35, 28, 0.04)',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F1F5F2',
+    textSecondary: '#A2B5AB',
+    textMuted: '#6D8277',
+    background: '#0F1613',
+    cardBackground: '#17221D',
+    backgroundElement: '#1F2C26',
+    backgroundSelected: '#2A3C34',
+    primary: '#52B788',
+    primaryHover: '#74C69D',
+    primaryLight: '#1B3528',
+    accent: '#74C69D',
+    amberLight: '#382807',
+    amberText: '#FBBF24',
+    border: '#24342C',
+    cardShadow: 'rgba(0, 0, 0, 0.25)',
   },
 } as const;
 
@@ -28,13 +42,9 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -58,8 +68,9 @@ export const Spacing = {
   three: 16,
   four: 24,
   five: 32,
-  six: 64,
+  six: 48,
+  seven: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const BottomTabInset = Platform.select({ ios: 60, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
